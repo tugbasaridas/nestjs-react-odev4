@@ -44,6 +44,11 @@ export default function App() {
         formData.append("confirmPassword", form.confirmPassword);
       }
 
+       if (editingProfile && form.password.trim() !== "") {
+        formData.append("password", form.password);
+        formData.append("confirmPassword", form.confirmPassword);
+      }
+
       formData.append("profileTypeId", form.profileTypeId.toString());
 
       if (form.photo) {
@@ -127,3 +132,4 @@ export default function App() {
     </div>
   );
 }
+
