@@ -6,6 +6,7 @@ import { Profile } from './entities/profile.entity';
 import { ProfileType } from '../profile-types/entities/profile-type.entity';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class ProfilesService {
@@ -82,10 +83,23 @@ export class ProfilesService {
       profile.email = updateProfileDto.email;
     }
 
-    if (updateProfileDto.password) {
-      const hashed = await bcrypt.hash(updateProfileDto.password, 10);
-      profile.password = hashed;
-    }
+ if (updateProfileDto.password !== undefined) {
+  if (updateProfileDto.password.trim() === '') {
+    throw new BadRequestException('Şifre boş bırakılamaz');
+  }
+
+  if (!updateProfileDto.confirmPassword) {
+    throw new BadRequestException('Şifre tekrarı zorunludur');
+  }
+
+  if (updateProfileDto.password !== updateProfileDto.confirmPassword) {
+    throw new BadRequestException('Şifreler uyuşmuyor');
+  }
+
+  const hashed = await bcrypt.hash(updateProfileDto.password, 10);
+  profile.password = hashed;
+}
+
 
     if (updateProfileDto.profileTypeId !== undefined) {
       const profileType = await this.profileTypesRepo.findOne({
@@ -115,3 +129,4 @@ export class ProfilesService {
     return { message: 'Profile deleted successfully' };
   }
 }
+
